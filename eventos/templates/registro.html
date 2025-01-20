@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Registro</title>
 </head>
 
@@ -13,16 +14,6 @@
     <div class="min-h-screen flex items-center justify-center">
         <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
             <h2 class="text-2xl font-bold mb-6 text-blue-500 text-center">Crear una Cuenta</h2>
-
-            {% if error %}
-            <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
-                {{ error }}
-            </div>
-            {% elif success %}
-            <div class="bg-green-100 text-green-700 p-4 rounded mb-4">
-                {{ success }}
-            </div>
-            {% endif %}
 
             <form action="/registro" method="POST" class="space-y-4">
                 <div>
@@ -60,16 +51,5 @@
             </p>
         </div>
     </div>
-
-    <script>
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
-
-        togglePassword.addEventListener('click', function () {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-        });
-    </script>
 </body>
-
 </html>

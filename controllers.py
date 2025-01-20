@@ -10,34 +10,41 @@ controllers_bp = Blueprint('controllers', __name__)
 @controllers_bp.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
-        nombre = request.form['nombre']
-        email = request.form['email']
-        password = request.form['password']
+        try:
+            nombre = request.form['nombre']
+            email = request.form['email']
+            password = request.form['password']
 
-        # Validar el formato del correo
-        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            return render_template('registro.html', error="Correo no válido.")
+            # Validar el formato del correo
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                flash("Correo no válido.", "error")
+                return redirect(url_for('controllers.registro'))
 
-        # Validar la fuerza de la contraseña
-        if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-])[A-Za-z\d@$!%*?&\-]{8,}$', password):
-            return render_template(
-                'registro.html',
-                error="La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, una minúscula, un número y un símbolo."
-            )
+            # Eliminar la validación estricta de la contraseña
+            # Validar si el correo ya está registrado
+            if Organizador.query.filter_by(email=email).first():
+                flash("El correo ya está registrado.", "error")
+                return redirect(url_for('controllers.registro'))
 
-        # Verificar si el correo ya está registrado
-        if Organizador.query.filter_by(email=email).first():
-            return render_template('registro.html', error="El correo ya está registrado.")
+            # Encriptar la contraseña y guardar el organizador
+            hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+            nuevo_organizador = Organizador(nombre=nombre, email=email, password=hashed_password)
 
-        # Encriptar la contraseña y guardar el organizador
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        nuevo_organizador = Organizador(nombre=nombre, email=email, password=hashed_password)
-        db.session.add(nuevo_organizador)
-        db.session.commit()
+            db.session.add(nuevo_organizador)
+            db.session.commit()
 
-        return render_template('login.html', success="Registro exitoso. Ahora puedes iniciar sesión.")
+            flash("Registro exitoso. Ahora puedes iniciar sesión.", "success")
+            return redirect(url_for('controllers.login'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error durante el registro: {str(e)}", "error")
+            return redirect(url_for('controllers.registro'))
 
     return render_template('registro.html')
+
+
+
 
 
 @controllers_bp.route('/login', methods=['GET', 'POST'])
@@ -46,6 +53,8 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
+        print(f"Intentando iniciar sesión: Email={email}, Password={password}")
+
         # Verificar las credenciales del usuario
         user = Organizador.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
@@ -53,10 +62,12 @@ def login():
             session['user_id'] = user.id_organizador
             session['user_name'] = user.nombre
             session['user_email'] = user.email
-            flash('Inicio de sesión exitoso.', 'success')
+            flash("Inicio de sesión exitoso.", "success")
+            print("Inicio de sesión exitoso.")
             return redirect(url_for('controllers.home'))
         else:
-            flash('Correo o contraseña incorrectos.', 'danger')
+            flash("Correo o contraseña incorrectos.", "error")
+            print("Correo o contraseña incorrectos.")
 
     return render_template('login.html')
 
@@ -64,13 +75,19 @@ def login():
 @controllers_bp.route('/logout')
 def logout():
     session.clear()
-    flash('Has cerrado sesión correctamente.', 'info')
+    flash("Has cerrado sesión correctamente.", "info")
+    print("Sesión cerrada correctamente.")
     return redirect(url_for('controllers.login'))
 
 
-# --- Rutas de gestión de eventos ---
+# --- Rutas protegidas ---
 @controllers_bp.route('/')
 def home():
+    if 'user_id' not in session:
+        flash("Debes iniciar sesión para acceder a esta página.", "error")
+        print("Intento de acceso sin sesión activa.")
+        return redirect(url_for('controllers.login'))
+
     eventos = Evento.query.order_by(Evento.fecha_creacion.desc()).all()
     return render_template("index.html", eventos=eventos, user_name=session.get('user_name'))
 
@@ -78,7 +95,8 @@ def home():
 @controllers_bp.route('/crear_evento', methods=['GET', 'POST'])
 def crear_evento():
     if 'user_id' not in session:
-        flash('Debes iniciar sesión para crear un evento.', 'danger')
+        flash("Debes iniciar sesión para crear un evento.", "error")
+        print("Intento de crear evento sin sesión activa.")
         return redirect(url_for('controllers.login'))
 
     categorias = Categoria.query.all()
@@ -93,7 +111,7 @@ def crear_evento():
         id_categoria = request.form.get('categoria')
 
         if not id_categoria:
-            flash('Debes seleccionar una categoría.', 'danger')
+            flash("Debes seleccionar una categoría.", "error")
             return render_template('crear_evento.html', categorias=categorias)
 
         try:
@@ -116,13 +134,16 @@ def crear_evento():
             db.session.add(evento_categoria)
             db.session.commit()
 
-            flash('Evento creado exitosamente.', 'success')
+            flash("Evento creado exitosamente.", "success")
+            print("Evento creado exitosamente.")
             return redirect(url_for('controllers.home'))
         except Exception as e:
             db.session.rollback()
-            flash(f'Error al crear el evento: {e}', 'danger')
+            print(f"Error al crear el evento: {e}")
+            flash(f"Error al crear el evento: {e}", "error")
 
     return render_template('crear_evento.html', categorias=categorias)
+
 
 # --- API para obtener eventos ---
 @controllers_bp.route('/api/eventos')
@@ -142,44 +163,28 @@ def get_eventos():
     ]
     return jsonify(eventos_json)
 
+
 @controllers_bp.route('/api/asistir', methods=['POST'])
 def asistir():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Debes iniciar sesión para registrarte como asistente.'}), 401
+
+    data = request.get_json()
+    if not data or 'id_evento' not in data:
+        return jsonify({'error': 'Solicitud inválida. Debes proporcionar el campo id_evento.'}), 400
+
+    id_evento = data['id_evento']
+    user_id = session['user_id']
+
     try:
-        if 'user_id' not in session:
-            return jsonify({'error': 'Debes iniciar sesión para registrarte como asistente.'}), 401
-
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'El cuerpo de la solicitud debe ser un JSON válido.'}), 400
-
-        id_evento = data.get('id_evento')
-        if not id_evento:
-            return jsonify({'error': 'El campo id_evento es requerido'}), 400
-
-        # Obtener el nombre y el correo desde la sesión
-        nombre = session.get('user_name')
-        email = session.get('user_email')
-
-        if not email:
-            return jsonify({'error': 'El correo electrónico no está disponible en la sesión.'}), 400
-
-        # Verificar si el asistente ya está registrado
-        asistente = db.session.execute(
-            db.text("SELECT id_asistente FROM asistentes WHERE email = :email"),
-            {"email": email}
-        ).fetchone()
-
-        if not asistente:
-            # Crear un nuevo asistente
-            db.session.execute(
-                db.text("INSERT INTO asistentes (nombre, email) VALUES (:nombre, :email)"),
-                {"nombre": nombre, "email": email}
-            )
-            db.session.commit()
-
+        db.session.execute(
+            db.text("INSERT INTO asistentes (id_evento, id_organizador) VALUES (:id_evento, :id_organizador)"),
+            {"id_evento": id_evento, "id_organizador": user_id}
+        )
+        db.session.commit()
         return jsonify({'message': f'¡Registro exitoso como asistente en el evento {id_evento}!'}), 200
 
     except Exception as e:
         db.session.rollback()
+        print(f"Error al registrarse como asistente: {e}")
         return jsonify({'error': str(e)}), 500
-
