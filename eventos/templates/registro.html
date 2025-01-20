@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Registro</title>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6 text-blue-500 text-center">Crear una Cuenta</h2>
+
+            {% if error %}
+            <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
+                {{ error }}
+            </div>
+            {% elif success %}
+            <div class="bg-green-100 text-green-700 p-4 rounded mb-4">
+                {{ success }}
+            </div>
+            {% endif %}
+
+            <form action="/registro" method="POST" class="space-y-4">
+                <div>
+                    <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
+                    <input type="text" id="nombre" name="nombre" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                    <input type="email" id="email" name="email" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-3 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path
+                                    d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zM3.46 10c.28-.92.76-1.78 1.4-2.52A6.978 6.978 0 0110 3.46a6.978 6.978 0 015.14 2.02c.64.74 1.12 1.6 1.4 2.52-.28.92-.76 1.78-1.4 2.52A6.978 6.978 0 0110 16.54a6.978 6.978 0 01-5.14-2.02A6.978 6.978 0 013.46 10z" />
+                                <circle cx="10" cy="10" r="2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Registrarse
+                </button>
+            </form>
+            <p class="mt-4 text-sm text-center text-gray-600">
+                ¿Ya tienes una cuenta? <a href="/login" class="text-blue-500 hover:underline">Inicia sesión aquí</a>.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        });
+    </script>
+</body>
+
+</html>

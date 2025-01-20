@@ -1,0 +1,240 @@
+/* General */
+body {
+    background-color: #f4f4f9;
+    font-family: Arial, sans-serif;
+    color: #333;
+  }
+  
+  /* Header */
+  header {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    padding: 1.5rem 0;
+  }
+  
+  /* Botón de Menú */
+  .sidemenu__btn {
+    display: block;
+    width: 50px;
+    height: 50px;
+    background: transparent;
+    border: none;
+    position: relative;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  .sidemenu__btn span {
+    display: block;
+    width: 25px;
+    height: 2px;
+    margin: 6px auto;
+    background: white;
+    position: relative;
+    transition: all 0.4s ease;
+  }
+  
+  .sidemenu__btn.active .top {
+    transform: translateY(8px) rotate(45deg);
+  }
+  
+  .sidemenu__btn.active .mid {
+    opacity: 0;
+  }
+  
+  .sidemenu__btn.active .bottom {
+    transform: translateY(-8px) rotate(-45deg);
+  }
+  
+  /* Menú Lateral */
+  .sidemenu__wrapper {
+    padding-top: 60px;
+  }
+  
+  .sidemenu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .sidemenu__item a {
+    display: block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: 0.3s;
+  }
+  
+  .sidemenu__item a:hover {
+    background-color: lightgrey;
+    color: black;
+  }
+  
+  /* Animaciones del Menú */
+  .translateX-enter {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  
+  .translateX-enter-active,
+  .translateX-leave-active {
+    transform-origin: top left;
+    transition: all 0.2s ease;
+  }
+  
+  .translateX-leave-to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  
+  /* Flip Cards */
+  .perspective {
+    perspective: 1000px;
+  }
+  
+  .card {
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+    position: relative;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .card:hover {
+    transform: rotateY(180deg);
+  }
+  
+  .card-front,
+  .card-back {
+    backface-visibility: hidden;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+  }
+  
+  .card-front {
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-back {
+    background-color: #343a40;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: rotateY(180deg);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  /* Tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+tr:nth-child(even) {
+  background-color: #f4f4f9;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Checkbox */
+input[type="radio"] {
+  margin: 0 auto;
+  display: block;
+  cursor: pointer;
+}
+
+/* Botones */
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Header */
+.header {
+  background-color: #007bff;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header__title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.header__button {
+  background-color: white;
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s, color 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header__button:hover {
+  background-color: #0056b3;
+  color: white;
+}
+
+/* Combo Box */
+.combo-box {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s;
+}
+
+.combo-box:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
