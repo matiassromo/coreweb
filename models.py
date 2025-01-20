@@ -23,7 +23,8 @@ class Evento(db.Model):
     lugar = db.Column(db.String(255), nullable=False)
     presupuesto = db.Column(db.Numeric, nullable=False)
     id_organizador = db.Column(db.Integer, db.ForeignKey('organizadores.id_organizador'), nullable=False)
-    fecha_creacion = db.Column(db.DateTime, server_default=db.func.now())
+    fecha_creacion = db.Column(db.DateTime, server_default=db.func.now())  # Esta columna es requerida
+
 
     categorias = db.relationship(
         'Categoria',
