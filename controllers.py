@@ -141,3 +141,45 @@ def get_eventos():
         for evento in eventos
     ]
     return jsonify(eventos_json)
+
+@controllers_bp.route('/api/asistir', methods=['POST'])
+def asistir():
+    try:
+        if 'user_id' not in session:
+            return jsonify({'error': 'Debes iniciar sesión para registrarte como asistente.'}), 401
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'El cuerpo de la solicitud debe ser un JSON válido.'}), 400
+
+        id_evento = data.get('id_evento')
+        if not id_evento:
+            return jsonify({'error': 'El campo id_evento es requerido'}), 400
+
+        # Obtener el nombre y el correo desde la sesión
+        nombre = session.get('user_name')
+        email = session.get('user_email')
+
+        if not email:
+            return jsonify({'error': 'El correo electrónico no está disponible en la sesión.'}), 400
+
+        # Verificar si el asistente ya está registrado
+        asistente = db.session.execute(
+            db.text("SELECT id_asistente FROM asistentes WHERE email = :email"),
+            {"email": email}
+        ).fetchone()
+
+        if not asistente:
+            # Crear un nuevo asistente
+            db.session.execute(
+                db.text("INSERT INTO asistentes (nombre, email) VALUES (:nombre, :email)"),
+                {"nombre": nombre, "email": email}
+            )
+            db.session.commit()
+
+        return jsonify({'message': f'¡Registro exitoso como asistente en el evento {id_evento}!'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
