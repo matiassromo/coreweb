@@ -1,8 +1,5 @@
-# Archivos y directorios sensibles
 .env
 __pycache__/
 *.pyc
 *.log
-
-# Entornos virtuales
 venv/
