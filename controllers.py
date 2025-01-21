@@ -148,7 +148,7 @@ def crear_evento():
 # --- API para obtener eventos ---
 @controllers_bp.route('/api/eventos')
 def get_eventos():
-    eventos = Evento.query.order_by(Evento.fecha_creacion.desc()).limit(6).all()
+    eventos = Evento.query.order_by(Evento.fecha_creacion.desc()).limit(20).all()
     eventos_json = [
         {
             "id_evento": evento.id_evento,
