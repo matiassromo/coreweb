@@ -48,23 +48,6 @@ class EventoCategoria(db.Model):
     id_categoria = db.Column(db.Integer, db.ForeignKey('categorias.id_categoria'), primary_key=True)
 
 
-class Asistente(db.Model):
-    __tablename__ = "asistentes"
-    id_asistente = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(255), nullable=False)
-    email = db.Column(db.String(255), unique=True, nullable=False)
-
-    # Aquí se puede agregar una relación si la necesitas
-    # eventos_asistidos = db.relationship('Evento', secondary='evento_asistente', backref=db.backref('asistentes', lazy='dynamic'))
-
-
-
-class EventoAsistente(db.Model):
-    __tablename__ = 'evento_asistente'
-    id_evento = db.Column(db.Integer, db.ForeignKey('eventos.id_evento'), primary_key=True)
-    id_asistente = db.Column(db.Integer, db.ForeignKey('asistentes.id_asistente'), primary_key=True)
-
-
 class Gasto(db.Model):
     __tablename__ = 'gastos'
     id_gasto = db.Column(db.Integer, primary_key=True)

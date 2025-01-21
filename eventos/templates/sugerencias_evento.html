@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugerencias para el Evento</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Cabecera */
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        /* Formulario */
+        form {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        form label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        form select, form input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        form button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        form button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Resultados */
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        p {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+
+        /* Opcional: Separar cada resultado */
+        p strong {
+            color: #34495e;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sugerencias para tu Evento</h1>
+
+    <form method="POST" action="{{ url_for('controllers.sugerencias_evento') }}">
+        <label for="categoria">Selecciona una categoría (opcional):</label>
+        <select name="categoria" id="categoria">
+            <option value="">-- Seleccionar --</option>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
+            {% endfor %}
+        </select>
+        <br>
+
+        <label for="presupuesto">Filtrar por presupuesto (opcional):</label>
+        <input type="number" name="presupuesto" id="presupuesto" step="0.01" placeholder="Presupuesto">
+        <br>
+
+        <button type="submit">Obtener Sugerencias</button>
+    </form>
+
+    <h2>Resultados:</h2>
+    <p><strong>Categoría Sugerida:</strong> {{ sugerencias.categoria }}</p>
+    <p><strong>Lugar Sugerido:</strong> {{ sugerencias.lugar }}</p>
+    <p><strong>Presupuesto Sugerido:</strong> {{ sugerencias.presupuesto }}</p>
+</body>
+</html>
