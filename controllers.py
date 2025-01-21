@@ -291,8 +291,8 @@ def sugerencias_evento():
     categorias = Categoria.query.all()
 
     # Inicializar filtros
-    categoria_seleccionada = request.form.get('categoria')
-    presupuesto_filtro = request.form.get('presupuesto')
+    categoria_seleccionada = request.form.get('categoria', None)
+    presupuesto_filtro = request.form.get('presupuesto', None)
 
     # Convertir presupuesto si se ingresó
     try:
@@ -343,7 +343,7 @@ def sugerencias_evento():
     # Sugerir presupuesto promedio
     presupuesto_sugerido = round(sum(presupuestos) / len(presupuestos), 2) if presupuestos else None
 
-    # Sugerir categoría si no se seleccionó una
+    # Sugerir categoría solo si no se seleccionó una
     categoria_sugerida_id = (
         max(categorias_contador, key=categorias_contador.get, default=None)
         if not categoria_seleccionada else None
@@ -354,12 +354,19 @@ def sugerencias_evento():
 
     # Crear un mensaje de sugerencias
     sugerencias = {
-        "categoria": categoria_sugerida or "No se encontró una categoría sugerida.",
+        "categoria": categoria_sugerida or None,
         "lugar": lugar_sugerido or "No se encontró un lugar sugerido.",
         "presupuesto": presupuesto_sugerido or "No se encontró un presupuesto sugerido.",
     }
 
-    return render_template('sugerencias_evento.html', sugerencias=sugerencias, categorias=categorias)
+    return render_template(
+        'sugerencias_evento.html',
+        sugerencias=sugerencias,
+        categorias=categorias,
+        categoria_seleccionada=categoria_seleccionada,
+        presupuesto_filtro=presupuesto_filtro,
+    )
+
 
 if __name__ == "__main__":
     controllers_bp.run(debug=True)

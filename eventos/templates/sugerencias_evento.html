@@ -12,27 +12,30 @@
                 <select name="categoria" id="categoria" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     <option value="">-- Seleccionar --</option>
                     {% for categoria in categorias %}
-                    <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
+                    <option value="{{ categoria.id_categoria }}" {% if categoria.id_categoria == categoria_seleccionada|int %}selected{% endif %}>
+                        {{ categoria.nombre }}
+                    </option>
                     {% endfor %}
                 </select>
             </div>
 
             <div>
                 <label for="presupuesto" class="block text-sm font-medium text-gray-700">Filtrar por presupuesto (opcional):</label>
-                <input type="number" name="presupuesto" id="presupuesto" step="0.01" placeholder="Presupuesto" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <input type="number" name="presupuesto" id="presupuesto" step="0.01" placeholder="Presupuesto"
+                       class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                       value="{{ presupuesto_filtro if presupuesto_filtro is not none else '' }}">
             </div>
 
             <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Obtener Sugerencias</button>
         </form>
     </div>
 
-    <div class="mt-8">
-        <h2 class="text-xl font-semibold text-center text-blue-500">Resultados</h2>
-        <div class="bg-white p-6 rounded-lg shadow-lg max-w-xl mx-auto mt-4 space-y-4">
-            <p><strong>Categoría Sugerida:</strong> {{ sugerencias.categoria }}</p>
-            <p><strong>Lugar Sugerido:</strong> {{ sugerencias.lugar }}</p>
-            <p><strong>Presupuesto Sugerido:</strong> {{ sugerencias.presupuesto }}</p>
-        </div>
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-xl mx-auto mt-4 space-y-4">
+        {% if not categoria_seleccionada %}
+        <p><strong>Categoría Sugerida:</strong> {{ sugerencias.categoria }}</p>
+        {% endif %}
+        <p><strong>Lugar Sugerido:</strong> {{ sugerencias.lugar }}</p>
+        <p><strong>Presupuesto Sugerido:</strong> {{ sugerencias.presupuesto }}</p>
     </div>
 </main>
 {% endblock %}
