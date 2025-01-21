@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, session, flash, url_for, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, Organizador, Evento, Categoria, EventoCategoria, Asistente
+from models import db, Organizador, Evento, Categoria, EventoCategoria
 import re
 
 # Crear un Blueprint para las rutas
@@ -20,7 +20,6 @@ def registro():
                 flash("Correo no válido.", "error")
                 return redirect(url_for('controllers.registro'))
 
-            # Eliminar la validación estricta de la contraseña
             # Validar si el correo ya está registrado
             if Organizador.query.filter_by(email=email).first():
                 flash("El correo ya está registrado.", "error")
@@ -42,10 +41,6 @@ def registro():
             return redirect(url_for('controllers.registro'))
 
     return render_template('registro.html')
-
-
-
-
 
 @controllers_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -71,14 +66,12 @@ def login():
 
     return render_template('login.html')
 
-
 @controllers_bp.route('/logout')
 def logout():
     session.clear()
     flash("Has cerrado sesión correctamente.", "info")
     print("Sesión cerrada correctamente.")
     return redirect(url_for('controllers.login'))
-
 
 # --- Rutas protegidas ---
 @controllers_bp.route('/')
@@ -90,7 +83,6 @@ def home():
 
     eventos = Evento.query.order_by(Evento.fecha_creacion.desc()).all()
     return render_template("index.html", eventos=eventos, user_name=session.get('user_name'))
-
 
 @controllers_bp.route('/crear_evento', methods=['GET', 'POST'])
 def crear_evento():
@@ -144,7 +136,6 @@ def crear_evento():
 
     return render_template('crear_evento.html', categorias=categorias)
 
-
 # --- API para obtener eventos ---
 @controllers_bp.route('/api/eventos')
 def get_eventos():
@@ -162,66 +153,6 @@ def get_eventos():
         for evento in eventos
     ]
     return jsonify(eventos_json)
-
-
-@controllers_bp.route('/api/asistir', methods=['POST'])
-def asistir():
-    try:
-        if 'user_id' not in session:
-            return jsonify({'error': 'Debes iniciar sesión para registrarte como asistente.'}), 401
-
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'El cuerpo de la solicitud debe ser un JSON válido.'}), 400
-
-        id_evento = data.get('id_evento')
-        if not id_evento:
-            return jsonify({'error': 'El campo id_evento es requerido'}), 400
-
-        # Obtener el nombre y el correo desde la sesión
-        nombre = session.get('user_name')
-        email = session.get('user_email')
-
-        if not email:
-            return jsonify({'error': 'El correo electrónico no está disponible en la sesión.'}), 400
-
-        # Verificar si el asistente ya existe en la tabla "asistentes"
-        asistente = Asistente.query.filter_by(email=email).first()
-
-        if not asistente:
-            # Si no existe, crear un nuevo asistente
-            asistente = Asistente(nombre=nombre, email=email)
-            db.session.add(asistente)
-            db.session.commit()
-
-        # Verificar si el asistente ya está registrado para este evento en la tabla intermedia
-        evento_asistente = db.session.execute(
-            db.text("""
-                SELECT 1 FROM evento_asistente
-                WHERE id_asistente = :id_asistente AND id_evento = :id_evento
-            """),
-            {"id_asistente": asistente.id_asistente, "id_evento": id_evento}
-        ).fetchone()
-
-        if evento_asistente:
-            return jsonify({'message': f'Ya estás registrado en este evento, {nombre} ({email}).'}), 200
-
-        # Registrar al asistente en el evento
-        db.session.execute(
-            db.text("""
-                INSERT INTO evento_asistente (id_evento, id_asistente)
-                VALUES (:id_evento, :id_asistente)
-            """),
-            {"id_evento": id_evento, "id_asistente": asistente.id_asistente}
-        )
-        db.session.commit()
-
-        return jsonify({'message': f'¡Registro exitoso como asistente en el evento {id_evento}, {nombre} ({email})!'}), 200
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
 
 @controllers_bp.route('/gastos', methods=['GET', 'POST'])
 def gastos():
@@ -318,7 +249,6 @@ def gastos():
 
     return render_template('gastos.html', eventos=eventos_usuario, evento_seleccionado=evento_seleccionado, gastos_por_evento=gastos_por_evento, categorias=categorias)
 
-
 @controllers_bp.route('/api/eventos_grafico', methods=['GET'])
 def eventos_grafico():
     if 'user_id' not in session:
@@ -343,7 +273,6 @@ def eventos_grafico():
     ]
 
     return jsonify(eventos_data)
-
 
 @controllers_bp.route('/grafico')
 def grafico():
@@ -431,7 +360,6 @@ def sugerencias_evento():
     }
 
     return render_template('sugerencias_evento.html', sugerencias=sugerencias, categorias=categorias)
-
 
 if __name__ == "__main__":
     controllers_bp.run(debug=True)

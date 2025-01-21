@@ -32,9 +32,6 @@ class Evento(db.Model):
         backref=db.backref('eventos', lazy='dynamic')
     )
 
-    # Relación muchos a muchos con Asistentes (cambiamos el backref a 'asistentes')
-    asistentes = db.relationship('Asistente', secondary='evento_asistente', backref=db.backref('eventos_asistidos', lazy='dynamic'))
-
 
 class Categoria(db.Model):
     __tablename__ = 'categorias'
