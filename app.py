@@ -23,9 +23,12 @@ app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
 # Middleware para redirigir al dominio base
 @app.before_request
 def redirect_to_base_url():
-    # Redirige todas las solicitudes al dominio de Azure si no es el correcto
-    if request.host != "eventoscore.azurewebsites.net":
+    # Permitir acceso desde localhost y el dominio de producción
+    allowed_hosts = ["127.0.0.1:5000", "eventoscore.azurewebsites.net"]
+    
+    if request.host not in allowed_hosts:
         return redirect("https://eventoscore.azurewebsites.net" + request.path, code=301)
+
 
 # Inicializar la base de datos y migración
 db.init_app(app)
