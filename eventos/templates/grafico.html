@@ -29,7 +29,7 @@
                     <option v-for="evento in eventos" :key="evento.id_evento" :value="evento">
                         [[ evento.nombre ]]
                     </option>
-                </select>
+                </select>                
             </div>
             
             <!-- Contenedor del Gráfico -->
@@ -55,13 +55,14 @@
                         if (!response.ok) throw new Error('Error al obtener eventos');
                         this.eventos = await response.json();
                         if (this.eventos.length > 0) {
-                            this.eventoSeleccionado = this.eventos[0];
+                            this.eventoSeleccionado = this.eventos[0];  // Inicializar con el primer evento
                             this.renderGrafico();
                         }
                     } catch (error) {
                         console.error('Error al cargar eventos:', error);
                     }
-                },
+                }
+                ,
                 renderGrafico() {
                     if (!this.eventoSeleccionado) return;
 

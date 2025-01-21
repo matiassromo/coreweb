@@ -222,3 +222,123 @@ def asistir():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+
+@controllers_bp.route('/gastos', methods=['GET', 'POST'])
+def gastos():
+    if 'user_id' not in session:
+        flash('Debes iniciar sesión para gestionar tus eventos.', 'danger')
+        return redirect(url_for('login'))
+
+    # Obtener los eventos creados por el usuario autenticado
+    eventos_usuario = Evento.query.filter_by(id_organizador=session['user_id']).all()
+
+    evento_seleccionado = None
+
+    if request.method == 'POST':
+        # Si el usuario selecciona un evento para editar
+        if 'seleccionar_evento' in request.form:
+            evento_id = request.form['evento_id']
+            evento_seleccionado = Evento.query.get_or_404(evento_id)
+
+        # Si el usuario guarda cambios en el evento seleccionado
+        elif 'guardar_cambios' in request.form:
+            evento_id = request.form['evento_id']
+            evento = Evento.query.get_or_404(evento_id)
+
+            if evento.id_organizador != session['user_id']:
+                flash('No tienes permiso para editar este evento.', 'danger')
+                return redirect(url_for('gastos'))
+
+            # Actualizar los datos del evento
+            evento.nombre = request.form.get('nombre')
+            evento.descripcion = request.form.get('descripcion')
+            evento.fecha = request.form.get('fecha')
+            evento.hora = request.form.get('hora')
+            evento.lugar = request.form.get('lugar')
+            evento.presupuesto = request.form.get('presupuesto')
+
+            # Guardar el precio final proporcionado por el usuario
+            precio_final = request.form.get('precio_final')
+            if precio_final:
+                try:
+                    # Verificar si ya existe un registro en gastos para este evento
+                    gasto_existente = db.session.execute(
+                        db.text("SELECT id_gasto FROM gastos WHERE id_evento = :id_evento"),
+                        {"id_evento": evento.id_evento}
+                    ).scalar()
+
+                    if gasto_existente:
+                        # Actualizar el registro existente
+                        db.session.execute(
+                            db.text("UPDATE gastos SET cantidad = :precio_final WHERE id_evento = :id_evento"),
+                            {"precio_final": precio_final, "id_evento": evento.id_evento}
+                        )
+                    else:
+                        # Insertar un nuevo registro en la tabla gastos
+                        db.session.execute(
+                            db.text(
+                                "INSERT INTO gastos (id_evento, descripcion, cantidad) VALUES (:id_evento, :descripcion, :precio_final)"
+                            ),
+                            {"id_evento": evento.id_evento, "descripcion": "Precio Final del Evento", "precio_final": precio_final}
+                        )
+
+                    db.session.commit()
+                    flash('Evento y precio final actualizados exitosamente.', 'success')
+                except Exception as e:
+                    db.session.rollback()
+                    flash(f'Error al actualizar el precio final: {e}', 'danger')
+
+            try:
+                db.session.commit()
+                flash('Evento actualizado exitosamente.', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error al actualizar el evento: {e}', 'danger')
+
+    # Obtener los gastos asociados a los eventos con una consulta explícita
+    gastos_por_evento = {
+        evento.id_evento: db.session.execute(
+            db.text("SELECT SUM(cantidad) FROM gastos WHERE id_evento = :id_evento"),
+            {"id_evento": evento.id_evento}
+        ).scalar() or 0
+        for evento in eventos_usuario
+    }
+
+    return render_template('gastos.html', eventos=eventos_usuario, evento_seleccionado=evento_seleccionado, gastos_por_evento=gastos_por_evento)
+
+@controllers_bp.route('/api/eventos_grafico', methods=['GET'])
+def eventos_grafico():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Debes iniciar sesión para ver esta información.'}), 401
+
+    eventos = db.session.execute(
+        db.text("""
+            SELECT 
+                id_evento,
+                nombre, 
+                presupuesto, 
+                COALESCE((SELECT SUM(cantidad) FROM gastos WHERE id_evento = eventos.id_evento), 0) AS costo_final
+            FROM eventos
+            WHERE id_organizador = :id_organizador
+        """),
+        {"id_organizador": session['user_id']}
+    ).fetchall()
+
+    eventos_data = [
+        {"id_evento": evento.id_evento, "nombre": evento.nombre, "presupuesto": float(evento.presupuesto), "costo_final": float(evento.costo_final)}
+        for evento in eventos
+    ]
+
+    return jsonify(eventos_data)
+
+
+@controllers_bp.route('/grafico')
+def grafico():
+    if 'user_id' not in session:
+        flash('Debes iniciar sesión para ver esta página.', 'danger')
+        return redirect(url_for('login'))
+    return render_template('grafico.html')
+
+
+if __name__ == "__main__":
+    controllers_bp.run(debug=True)

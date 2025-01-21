@@ -63,3 +63,11 @@ class EventoAsistente(db.Model):
     __tablename__ = 'evento_asistente'
     id_evento = db.Column(db.Integer, db.ForeignKey('eventos.id_evento'), primary_key=True)
     id_asistente = db.Column(db.Integer, db.ForeignKey('asistentes.id_asistente'), primary_key=True)
+
+
+class Gasto(db.Model):
+    __tablename__ = 'gastos'
+    id_gasto = db.Column(db.Integer, primary_key=True)
+    id_evento = db.Column(db.Integer, db.ForeignKey('eventos.id_evento'), nullable=False)
+    descripcion = db.Column(db.String(255), nullable=False)
+    cantidad = db.Column(db.Numeric, nullable=False)
