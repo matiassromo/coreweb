@@ -38,4 +38,6 @@ if __name__ == "__main__":
     # Crear las tablas si no existen
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    # Ejecutar la aplicación en el puerto proporcionado por Azure
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port)
