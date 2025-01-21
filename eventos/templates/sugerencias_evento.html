@@ -1,111 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <title>Sugerencias para el Evento</title>
-</head>
+{% block title %}Sugerencias para el Evento{% endblock %}
 
-<body class="bg-gray-100 font-sans">
-  <!-- Menú Lateral con Botón de Hamburguesa -->
-  <header id="sidemenu" class="relative">
-    <div class="flex justify-between items-center bg-blue-500 text-white py-4 px-6">
-      <h1 class="text-2xl font-bold">Sugerencias para el Evento</h1>
-      <div class="flex items-center">
-        {% if session.get('user_name') %}
-        <span class="mr-4">Hola, {{ session['user_name'] }}</span>
-        <a href="/logout" class="text-sm text-red-300 hover:underline">Cerrar sesión</a>
-        {% else %}
-        <a href="/login" class="text-sm text-white hover:underline">Iniciar sesión</a>
-        {% endif %}
-        <button class="sidemenu__btn" v-on:click="navOpen=!navOpen" v-bind:class="{ active: navOpen }">
-          <span class="top"></span>
-          <span class="mid"></span>
-          <span class="bottom"></span>
-        </button>
-      </div>
-    </div>
-    <transition name="translateX">
-      <nav v-show="navOpen" class="absolute top-0 left-0 bg-gray-800 text-white w-64 h-screen z-50">
-        <div class="sidemenu__wrapper">
-          <ul class="sidemenu__list">
-            {% if session.get('user_id') %}
-            <li class="sidemenu__item">
-              <a href="/gastos" class="block py-2 px-4 hover:bg-gray-700">Editar Gastos</a>
-            </li>
-            <li class="sidemenu__item">
-              <a href="/crear_evento" class="block py-2 px-4 hover:bg-gray-700">Crear Evento</a>
-            </li>
-            <li class="sidemenu__item">
-              <a href="/grafico" class="block py-2 px-4 hover:bg-gray-700">Ver Gráfico</a>
-            </li>
-            {% endif %}
-            <li class="sidemenu__item">
-              <a href="/" class="block py-2 px-4 hover:bg-gray-700">Inicio</a>
-            </li>
-            {% if not session.get('user_name') %}
-            <li class="sidemenu__item">
-              <a href="/login" class="block py-2 px-4 hover:bg-gray-700">Iniciar sesión</a>
-            </li>
-            {% endif %}
-          </ul>
-        </div>
-      </nav>
-    </transition>
-  </header>
-
-  <!-- Contenido Principal -->
-  <main id="app" class="container mx-auto mt-8">
+{% block content %}
+<main id="app" class="container mx-auto mt-8">
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-xl mx-auto">
-      <h2 class="text-xl font-semibold text-center text-blue-500 mb-4">Selecciona tus Preferencias</h2>
-      <form method="POST" action="{{ url_for('controllers.sugerencias_evento') }}" class="space-y-4">
-        <div>
-          <label for="categoria" class="block text-sm font-medium text-gray-700">Selecciona una categoría (opcional):</label>
-          <select name="categoria" id="categoria" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-            <option value="">-- Seleccionar --</option>
-            {% for categoria in categorias %}
-            <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
-            {% endfor %}
-          </select>
-        </div>
+        <h2 class="text-xl font-semibold text-center text-blue-500 mb-4">Selecciona tus Preferencias</h2>
+        <form method="POST" action="{{ url_for('controllers.sugerencias_evento') }}" class="space-y-4">
+            <div>
+                <label for="categoria" class="block text-sm font-medium text-gray-700">Selecciona una categoría (opcional):</label>
+                <select name="categoria" id="categoria" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <option value="">-- Seleccionar --</option>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <div>
-          <label for="presupuesto" class="block text-sm font-medium text-gray-700">Filtrar por presupuesto (opcional):</label>
-          <input type="number" name="presupuesto" id="presupuesto" step="0.01" placeholder="Presupuesto" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-        </div>
+            <div>
+                <label for="presupuesto" class="block text-sm font-medium text-gray-700">Filtrar por presupuesto (opcional):</label>
+                <input type="number" name="presupuesto" id="presupuesto" step="0.01" placeholder="Presupuesto" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
 
-        <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Obtener Sugerencias</button>
-      </form>
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Obtener Sugerencias</button>
+        </form>
     </div>
 
     <div class="mt-8">
-      <h2 class="text-xl font-semibold text-center text-blue-500">Resultados</h2>
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-xl mx-auto mt-4 space-y-4">
-        <p><strong>Categoría Sugerida:</strong> {{ sugerencias.categoria }}</p>
-        <p><strong>Lugar Sugerido:</strong> {{ sugerencias.lugar }}</p>
-        <p><strong>Presupuesto Sugerido:</strong> {{ sugerencias.presupuesto }}</p>
-      </div>
+        <h2 class="text-xl font-semibold text-center text-blue-500">Resultados</h2>
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-xl mx-auto mt-4 space-y-4">
+            <p><strong>Categoría Sugerida:</strong> {{ sugerencias.categoria }}</p>
+            <p><strong>Lugar Sugerido:</strong> {{ sugerencias.lugar }}</p>
+            <p><strong>Presupuesto Sugerido:</strong> {{ sugerencias.presupuesto }}</p>
+        </div>
     </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-gray-800 text-white text-center py-4 mt-8">
-    <p>&copy; 2025 Eventos Disponibles. Todos los derechos reservados.</p>
-  </footer>
-
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-  <script>
-    new Vue({
-      el: '#sidemenu',
-      data: {
-        navOpen: false,
-      },
-    });
-  </script>
-</body>
-
-</html>
+</main>
+{% endblock %}
