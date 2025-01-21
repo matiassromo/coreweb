@@ -23,14 +23,17 @@ class Evento(db.Model):
     lugar = db.Column(db.String(255), nullable=False)
     presupuesto = db.Column(db.Numeric, nullable=False)
     id_organizador = db.Column(db.Integer, db.ForeignKey('organizadores.id_organizador'), nullable=False)
-    fecha_creacion = db.Column(db.DateTime, server_default=db.func.now())  # Esta columna es requerida
+    fecha_creacion = db.Column(db.DateTime, server_default=db.func.now())
 
-
+    # Relación muchos a muchos con Categorias
     categorias = db.relationship(
         'Categoria',
         secondary='evento_categoria',
         backref=db.backref('eventos', lazy='dynamic')
     )
+
+    # Relación muchos a muchos con Asistentes (cambiamos el backref a 'asistentes')
+    asistentes = db.relationship('Asistente', secondary='evento_asistente', backref=db.backref('eventos_asistidos', lazy='dynamic'))
 
 
 class Categoria(db.Model):
@@ -50,3 +53,13 @@ class Asistente(db.Model):
     id_asistente = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
+
+    # Aquí se puede agregar una relación si la necesitas
+    # eventos_asistidos = db.relationship('Evento', secondary='evento_asistente', backref=db.backref('asistentes', lazy='dynamic'))
+
+
+
+class EventoAsistente(db.Model):
+    __tablename__ = 'evento_asistente'
+    id_evento = db.Column(db.Integer, db.ForeignKey('eventos.id_evento'), primary_key=True)
+    id_asistente = db.Column(db.Integer, db.ForeignKey('asistentes.id_asistente'), primary_key=True)

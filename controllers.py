@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, session, flash, url_for, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, Organizador, Evento, Categoria, EventoCategoria
+from models import db, Organizador, Evento, Categoria, EventoCategoria, Asistente
 import re
 
 # Crear un Blueprint para las rutas
@@ -166,25 +166,59 @@ def get_eventos():
 
 @controllers_bp.route('/api/asistir', methods=['POST'])
 def asistir():
-    if 'user_id' not in session:
-        return jsonify({'error': 'Debes iniciar sesión para registrarte como asistente.'}), 401
-
-    data = request.get_json()
-    if not data or 'id_evento' not in data:
-        return jsonify({'error': 'Solicitud inválida. Debes proporcionar el campo id_evento.'}), 400
-
-    id_evento = data['id_evento']
-    user_id = session['user_id']
-
     try:
+        if 'user_id' not in session:
+            return jsonify({'error': 'Debes iniciar sesión para registrarte como asistente.'}), 401
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'El cuerpo de la solicitud debe ser un JSON válido.'}), 400
+
+        id_evento = data.get('id_evento')
+        if not id_evento:
+            return jsonify({'error': 'El campo id_evento es requerido'}), 400
+
+        # Obtener el nombre y el correo desde la sesión
+        nombre = session.get('user_name')
+        email = session.get('user_email')
+
+        if not email:
+            return jsonify({'error': 'El correo electrónico no está disponible en la sesión.'}), 400
+
+        # Verificar si el asistente ya existe en la tabla "asistentes"
+        asistente = Asistente.query.filter_by(email=email).first()
+
+        if not asistente:
+            # Si no existe, crear un nuevo asistente
+            asistente = Asistente(nombre=nombre, email=email)
+            db.session.add(asistente)
+            db.session.commit()
+
+        # Verificar si el asistente ya está registrado para este evento en la tabla intermedia
+        evento_asistente = db.session.execute(
+            db.text("""
+                SELECT 1 FROM evento_asistente
+                WHERE id_asistente = :id_asistente AND id_evento = :id_evento
+            """),
+            {"id_asistente": asistente.id_asistente, "id_evento": id_evento}
+        ).fetchone()
+
+        if evento_asistente:
+            return jsonify({'message': f'Ya estás registrado en este evento, {nombre} ({email}).'}), 200
+
+        # Registrar al asistente en el evento
         db.session.execute(
-            db.text("INSERT INTO asistentes (id_evento, id_organizador) VALUES (:id_evento, :id_organizador)"),
-            {"id_evento": id_evento, "id_organizador": user_id}
+            db.text("""
+                INSERT INTO evento_asistente (id_evento, id_asistente)
+                VALUES (:id_evento, :id_asistente)
+            """),
+            {"id_evento": id_evento, "id_asistente": asistente.id_asistente}
         )
         db.session.commit()
-        return jsonify({'message': f'¡Registro exitoso como asistente en el evento {id_evento}!'}), 200
+
+        return jsonify({'message': f'¡Registro exitoso como asistente en el evento {id_evento}, {nombre} ({email})!'}), 200
 
     except Exception as e:
         db.session.rollback()
-        print(f"Error al registrarse como asistente: {e}")
         return jsonify({'error': str(e)}), 500
+
