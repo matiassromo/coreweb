@@ -1,144 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <title>Eventos Disponibles</title>
-</head>
+{% block title %}Eventos Disponibles{% endblock %}
 
-<body class="bg-gray-100 font-sans">
-  <!-- Menú Lateral con Botón de Hamburguesa -->
-  <header id="sidemenu" class="relative">
-    <div class="flex justify-between items-center bg-blue-500 text-white py-4 px-6">
-      <h1 class="text-2xl font-bold">Eventos Disponibles</h1>
-      <div class="flex items-center">
-        {% if session.get('user_name') %}
-        <span class="mr-4">Hola, {{ session['user_name'] }}</span>
-        <a href="/logout" class="text-sm text-red-300 hover:underline">Cerrar sesión</a>
-        {% else %}
-        <a href="/login" class="text-sm text-white hover:underline">Iniciar sesión</a>
-        {% endif %}
-        <button class="sidemenu__btn" v-on:click="navOpen=!navOpen" v-bind:class="{ active: navOpen }">
-          <span class="top"></span>
-          <span class="mid"></span>
-          <span class="bottom"></span>
-        </button>
-      </div>
-    </div>
-    <transition name="translateX">
-      <nav v-show="navOpen" class="absolute top-0 left-0 bg-gray-800 text-white w-64 h-screen z-50">
-        <div class="sidemenu__wrapper">
-          <ul class="sidemenu__list">
-            {% if session.get('user_id') %}
-            <li class="sidemenu__item">
-              <a href="/gastos" class="block py-2 px-4 hover:bg-gray-700">Editar Gastos</a>
-            </li>
-            <li class="sidemenu__item">
-              <a href="/crear_evento" class="block py-2 px-4 hover:bg-gray-700">Crear Evento</a>
-            </li>
-            <!-- Nuevo enlace para el gráfico -->
-            <li class="sidemenu__item">
-              <a href="/grafico" class="block py-2 px-4 hover:bg-gray-700">Ver Gráfico</a>
-            </li>
-            {% endif %}
-            <li class="sidemenu__item">
-              <a href="/" class="block py-2 px-4 hover:bg-gray-700">Inicio</a>
-            </li>
-            {% if not session.get('user_name') %}
-            <li class="sidemenu__item">
-              <a href="/login" class="block py-2 px-4 hover:bg-gray-700">Iniciar sesión</a>
-            </li>
-            {% endif %}
-          </ul>
+{% block content %}
+<main id="app" class="container mx-auto mt-8">
+  <!-- Botón para Sugerencias -->
+  <div class="flex justify-end mb-4">
+    <a href="{{ url_for('controllers.sugerencias_evento') }}" 
+       class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+      Sugerencias de Eventos
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Tarjetas dinámicas -->
+    <div v-for="evento in eventos" :key="evento.id_evento" class="perspective">
+      <div class="relative h-48 w-full card">
+        <!-- Frente de la tarjeta -->
+        <div class="card-front bg-blue-500 text-white flex items-center justify-center shadow-lg">
+          <h3 class="text-xl font-bold">[[ evento.nombre ]]</h3>
         </div>
-      </nav>
-    </transition>
-    
-  </header>
-
-  <!-- Contenido Principal -->
-  <main id="app" class="container mx-auto mt-8">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <!-- Tarjetas dinámicas -->
-      <div v-for="evento in eventos" :key="evento.id_evento" class="perspective">
-        <div class="relative h-48 w-full card">
-          <!-- Frente de la tarjeta -->
-          <div class="card-front bg-blue-500 text-white flex items-center justify-center shadow-lg">
-            <h3 class="text-xl font-bold">[[ evento.nombre ]]</h3>
-          </div>
-          <!-- Parte trasera de la tarjeta -->
-          <div class="card-back bg-gray-800 text-white flex flex-col items-center justify-center shadow-lg">
-            <p><strong>Fecha:</strong> [[ evento.fecha ]]</p>
-            <p><strong>Hora:</strong> [[ evento.hora ]]</p>
-            <p><strong>Lugar:</strong> [[ evento.lugar ]]</p>
-            <p v-if="evento.presupuesto"><strong>Presupuesto:</strong> $[[ evento.presupuesto ]]</p>
-            <!-- Botón Asistir -->
-            <button @click="asistir(evento.id_evento)" 
-            class="mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
-            Asistir
-          </button>
-
-          </div>
+        <!-- Parte trasera de la tarjeta -->
+        <div class="card-back bg-gray-800 text-white flex flex-col items-center justify-center shadow-lg">
+          <p><strong>Fecha:</strong> [[ evento.fecha ]]</p>
+          <p><strong>Hora:</strong> [[ evento.hora ]]</p>
+          <p><strong>Lugar:</strong> [[ evento.lugar ]]</p>
+          <p v-if="evento.presupuesto"><strong>Presupuesto:</strong> $[[ evento.presupuesto ]]</p>
         </div>
       </div>
     </div>
-  </main>
+  </div>
+</main>
 
-  <!-- Footer -->
-  <footer class="bg-gray-800 text-white text-center py-4 mt-8">
-    <p>&copy; 2025 Eventos Disponibles. Todos los derechos reservados.</p>
-  </footer>
-
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-  <script>
-    new Vue({
-      el: '#sidemenu',
-      data: {
-        navOpen: false,
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script>
+  new Vue({
+    el: '#app',
+    delimiters: ['[[', ']]'], // Cambiar delimitadores para evitar conflictos con Jinja2
+    data: {
+      eventos: [], // Datos de eventos
+    },
+    methods: {
+      async fetchEventos() {
+        try {
+          const response = await fetch('/api/eventos');
+          if (!response.ok) throw new Error('Error al obtener eventos');
+          const data = await response.json();
+          this.eventos = data;
+        } catch (error) {
+          console.error('Error al cargar eventos:', error);
+        }
       },
-    });
-
-    new Vue({
-      el: '#app',
-      delimiters: ['[[', ']]'], // Cambiar delimitadores para evitar conflictos con Jinja2
-      data: {
-        eventos: [],
-      },
-      methods: {
-        async fetchEventos() {
-          try {
-            const response = await fetch('/api/eventos');
-            if (!response.ok) throw new Error('Error al obtener eventos');
-            const data = await response.json();
-            this.eventos = data;
-          } catch (error) {
-            console.error('Error al cargar eventos:', error);
-          }
-        },
-        async asistir(eventoId) {
-          try {
-            const response = await fetch('/api/asistir', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id_evento: eventoId }),
-            });
-            const result = await response.json();
-            alert(result.message || result.error || 'Ocurrió un error.');
-          } catch (error) {
-            console.error('Error al registrarse:', error);
-            alert('Error al intentar registrarse.');
-          }
-        },
-      },
-      mounted() {
-        this.fetchEventos();
-      },
-    });
-  </script>
-</body>
-
-</html>
+    },
+    mounted() {
+      this.fetchEventos();
+    },
+  });
+</script>
+{% endblock %}

@@ -1,3 +1,8 @@
+{% extends "base.html" %}
+
+{% block title %}Gráfico de Eventos{% endblock %}
+
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,110 +15,101 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="bg-gray-100 font-sans">
-    <!-- Encabezado -->
-    <header class="header">
-        <h1 class="header__title">Gráfico de Eventos</h1>
-        <a href="/" class="header__button">Volver al Inicio</a>
-    </header>
 
-    <!-- Contenido Principal -->
-    <main id="app" class="container mx-auto mt-8">
-        <div class="text-center">
-            <h2 class="text-3xl font-bold text-gray-700 mb-6">Comparación de Presupuesto y Costo Final</h2>
-            
-            <!-- Combo Box para Seleccionar un Evento -->
-            <div class="mb-6">
-                <label for="eventoSelect" class="block text-gray-700 font-medium mb-2">Selecciona un Evento</label>
-                <select v-model="eventoSeleccionado" id="eventoSelect" class="combo-box">
-                    <option v-for="evento in eventos" :key="evento.id_evento" :value="evento">
-                        [[ evento.nombre ]]
-                    </option>
-                </select>                
-            </div>
-            
-            <!-- Contenedor del Gráfico -->
-            <div class="w-full max-w-4xl mx-auto">
-                <canvas id="eventosGrafico"></canvas>
-            </div>
+<!-- Contenido Principal -->
+<main id="app" class="container mx-auto mt-8">
+    <div class="text-center">
+        <h2 class="text-3xl font-bold text-gray-700 mb-6">Comparación de Presupuesto y Costo Final</h2>
+
+        <!-- Combo Box para Seleccionar un Evento -->
+        <div class="mb-6">
+            <label for="eventoSelect" class="block text-gray-700 font-medium mb-2">Selecciona un Evento</label>
+            <select v-model="eventoSeleccionado" id="eventoSelect" class="combo-box">
+                <option v-for="evento in eventos" :key="evento.id_evento" :value="evento">
+                    [[ evento.nombre ]]
+                </option>
+            </select>                
         </div>
-    </main>
+        
+        <!-- Contenedor del Gráfico -->
+        <div class="w-full max-w-4xl mx-auto">
+            <canvas id="eventosGrafico"></canvas>
+        </div>
+    </div>
+</main>
 
-    <script>
-        new Vue({
-            el: '#app',
-            delimiters: ['[[', ']]'], // Cambiar delimitadores para evitar conflictos con Jinja2
-            data: {
-                eventos: [], // Lista de eventos obtenida desde el backend
-                eventoSeleccionado: null, // Evento actualmente seleccionado
-                chart: null, // Referencia al gráfico
-            },
-            methods: {
-                async fetchEventos() {
-                    try {
-                        const response = await fetch('/api/eventos_grafico');
-                        if (!response.ok) throw new Error('Error al obtener eventos');
-                        this.eventos = await response.json();
-                        if (this.eventos.length > 0) {
-                            this.eventoSeleccionado = this.eventos[0];  // Inicializar con el primer evento
-                            this.renderGrafico();
-                        }
-                    } catch (error) {
-                        console.error('Error al cargar eventos:', error);
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'], // Cambiar delimitadores para evitar conflictos con Jinja2
+        data: {
+            eventos: [], // Lista de eventos obtenida desde el backend
+            eventoSeleccionado: null, // Evento actualmente seleccionado
+            chart: null, // Referencia al gráfico
+        },
+        methods: {
+            async fetchEventos() {
+                try {
+                    const response = await fetch('/api/eventos_grafico');
+                    if (!response.ok) throw new Error('Error al obtener eventos');
+                    this.eventos = await response.json();
+                    if (this.eventos.length > 0) {
+                        this.eventoSeleccionado = this.eventos[0];  // Inicializar con el primer evento
+                        this.renderGrafico();
                     }
+                } catch (error) {
+                    console.error('Error al cargar eventos:', error);
                 }
-                ,
-                renderGrafico() {
-                    if (!this.eventoSeleccionado) return;
+            },
+            renderGrafico() {
+                if (!this.eventoSeleccionado) return;
 
-                    const evento = this.eventoSeleccionado;
-                    const labels = ['Presupuesto', 'Costo Final'];
-                    const data = [evento.presupuesto, evento.costo_final];
+                const evento = this.eventoSeleccionado;
+                const labels = ['Presupuesto', 'Costo Final'];
+                const data = [evento.presupuesto, evento.costo_final];
 
-                    if (this.chart) {
-                        this.chart.destroy();
-                    }
+                if (this.chart) {
+                    this.chart.destroy();
+                }
 
-                    const ctx = document.getElementById('eventosGrafico').getContext('2d');
-                    this.chart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: `Datos del Evento: ${evento.nombre}`,
-                                data: data,
-                                backgroundColor: ['rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 132, 0.6)'],
-                                borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
-                                borderWidth: 1,
-                            }],
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: { position: 'top' },
-                                title: {
-                                    display: true,
-                                    text: `Presupuesto vs. Costo Final: ${evento.nombre}`,
-                                },
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    suggestedMax: Math.max(...data) + 10,
-                                },
+                const ctx = document.getElementById('eventosGrafico').getContext('2d');
+                this.chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `Datos del Evento: ${evento.nombre}`,
+                            data: data,
+                            backgroundColor: ['rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 132, 0.6)'],
+                            borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                            borderWidth: 1,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: {
+                                display: true,
+                                text: `Presupuesto vs. Costo Final: ${evento.nombre}`,
                             },
                         },
-                    });
-                },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                suggestedMax: Math.max(...data) + 10,
+                            },
+                        },
+                    },
+                });
             },
-            watch: {
-                eventoSeleccionado: 'renderGrafico',
-            },
-            mounted() {
-                this.fetchEventos();
-            },
-        });
-    </script>
-</body>
-
-</html>
+        },
+        watch: {
+            eventoSeleccionado: 'renderGrafico',
+        },
+        mounted() {
+            this.fetchEventos();
+        },
+    });
+</script>
+{% endblock %}

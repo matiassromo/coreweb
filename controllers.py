@@ -158,7 +158,7 @@ def get_eventos():
 def gastos():
     if 'user_id' not in session:
         flash('Debes iniciar sesión para gestionar tus eventos.', 'danger')
-        return redirect(url_for('login'))
+        return redirect(url_for('controllers.login'))
 
     # Obtener los eventos creados por el usuario autenticado
     eventos_usuario = Evento.query.filter_by(id_organizador=session['user_id']).all()
@@ -178,7 +178,7 @@ def gastos():
 
             if evento.id_organizador != session['user_id']:
                 flash('No tienes permiso para editar este evento.', 'danger')
-                return redirect(url_for('gastos'))
+                return redirect(url_for('controllers.gastos'))
 
             # Actualizar los datos del evento
             evento.nombre = request.form.get('nombre')

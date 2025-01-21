@@ -1,78 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Crear Evento</title>
-</head>
+{% block title %}Crear Evento{% endblock %}
 
-<body class="bg-gray-100 font-sans">
-    <header class="flex justify-between items-center bg-blue-500 text-white py-4 px-6">
-        <h1 class="text-2xl font-bold">Gestión de Gastos</h1>
-        <a href="/" class="text-white bg-red-500 hover:bg-red-600 font-medium py-2 px-4 rounded">Volver al Inicio</a>
-    </header>
+{% block content %}
+<div class="min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+        <h2 class="text-2xl font-bold mb-6 text-blue-500 text-center">Crear Nuevo Evento</h2>
 
-    <div class="min-h-screen flex items-center justify-center">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-            <h2 class="text-2xl font-bold mb-6 text-blue-500 text-center">Crear Nuevo Evento</h2>
+        <!-- Mensaje de éxito -->
+        {% if success %}
+        <div class="bg-green-100 text-green-700 p-4 rounded mb-4">{{ success }}</div>
+        {% endif %}
 
-            <!-- Mensaje de éxito -->
-            {% if success %}
-            <div class="bg-green-100 text-green-700 p-4 rounded mb-4">{{ success }}</div>
-            {% endif %}
-
-            <form action="/crear_evento" method="POST" class="space-y-4">
-                <div>
-                    <label for="categoria" class="block text-sm font-medium text-gray-700">Categoría</label>
-                    <select id="categoria" name="categoria" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                        <option value="" disabled selected>Selecciona una categoría</option>
-                        {% for categoria in categorias %}
-                        <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre del Evento</label>
-                    <input type="text" id="nombre" name="nombre" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción</label>
-                    <textarea id="descripcion" name="descripcion" required rows="3"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
-                </div>
-                <div>
-                    <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha</label>
-                    <input type="date" id="fecha" name="fecha" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label for="hora" class="block text-sm font-medium text-gray-700">Hora</label>
-                    <input type="time" id="hora" name="hora" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label for="lugar" class="block text-sm font-medium text-gray-700">Lugar</label>
-                    <input type="text" id="lugar" name="lugar" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label for="presupuesto" class="block text-sm font-medium text-gray-700">Presupuesto</label>
-                    <input type="number" id="presupuesto" name="presupuesto" required step="0.01"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <button type="submit"
-                    class="w-full bg-blue-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    Crear Evento
-                </button>
-            </form>
-        </div>
+        <form action="/crear_evento" method="POST" class="space-y-4">
+            <div>
+                <label for="categoria" class="block text-sm font-medium text-gray-700">Categoría</label>
+                <select id="categoria" name="categoria" required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <option value="" disabled selected>Selecciona una categoría</option>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria.id_categoria }}">{{ categoria.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre del Evento</label>
+                <input type="text" id="nombre" name="nombre" required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción</label>
+                <textarea id="descripcion" name="descripcion" required rows="3"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+            <div>
+                <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha</label>
+                <input type="date" id="fecha" name="fecha" required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="hora" class="block text-sm font-medium text-gray-700">Hora</label>
+                <input type="time" id="hora" name="hora" required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="lugar" class="block text-sm font-medium text-gray-700">Lugar</label>
+                <input type="text" id="lugar" name="lugar" required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="presupuesto" class="block text-sm font-medium text-gray-700">Presupuesto</label>
+                <input type="number" id="presupuesto" name="presupuesto" required step="0.01"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <button type="submit"
+                class="w-full bg-blue-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Crear Evento
+            </button>
+        </form>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

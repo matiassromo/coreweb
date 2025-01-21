@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>{% block title %}Eventos Disponibles{% endblock %}</title>
+</head>
+
+<body class="bg-gray-100 font-sans">
+  <!-- Navbar -->
+  <header class="flex justify-between items-center bg-blue-500 text-white py-4 px-6">
+    <div class="flex items-center">
+      <a href="/" class="text-2xl font-bold mr-6 hover:text-blue-300 hover:no-underline">Eventos Disponibles</a>
+      <nav class="flex space-x-4">
+        <a href="/crear_evento" class="text-white hover:text-blue-300 hover:no-underline transition duration-300">Crear Evento</a>
+        <a href="/gastos" class="text-white hover:text-blue-300 hover:no-underline transition duration-300">Editar Gastos</a>
+        <a href="/grafico" class="text-white hover:text-blue-300 hover:no-underline transition duration-300">Ver Gráfico</a>
+      </nav>
+    </div>
+    <div>
+      {% if session.get('user_name') %}
+      <span class="mr-4">Hola, {{ session['user_name'] }}</span>
+      <a href="/logout" class="text-sm text-red-300 hover:underline">Cerrar sesión</a>
+      {% else %}
+      <a href="/login" class="text-sm text-white hover:underline">Iniciar sesión</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- Contenido dinámico -->
+  <main class="container mx-auto mt-8">
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white text-center py-4 mt-8">
+    <p>&copy; 2025 Eventos Disponibles. Todos los derechos reservados.</p>
+  </footer>
+</body>
+
+</html>
