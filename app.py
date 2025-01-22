@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
@@ -20,6 +20,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
 
+# Middleware para redirigir al dominio base
+@app.before_request
+def redirect_to_base_url():
+    # Permitir acceso desde localhost y el dominio de producción
+    allowed_hosts = ["127.0.0.1:5000", "eventoscore.azurewebsites.net"]
+    
+    if request.host not in allowed_hosts:
+        return redirect("https://eventoscore.azurewebsites.net" + request.path, code=301)
+
+
 # Inicializar la base de datos y migración
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -31,4 +41,6 @@ if __name__ == "__main__":
     # Crear las tablas si no existen
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    # Ejecutar la aplicación en el puerto proporcionado por Azure
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port)
