@@ -81,11 +81,6 @@ Para ejecutar el proyecto en modo desarrollo:
    python app.py
    ```
 
-## Inicia el servidor de Vue.js para la parte del frontend
-```bash
-npm run serve
-```
-
 El backend se ejecutará en `http://127.0.0.1:5000` y el frontend en `http://localhost:8080`.
 
 ## Licencia
