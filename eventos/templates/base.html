@@ -19,15 +19,20 @@
         <a href="/gastos" class="text-white hover:text-blue-300 hover:no-underline transition duration-300">Editar Gastos</a>
         <a href="/grafico" class="text-white hover:text-blue-300 hover:no-underline transition duration-300">Ver Gráfico</a>
         <a href="/sugerencias_evento" class="text-white hover:text-blue-300 hover:no-underline transition duration-300">Sugerencias de Evento</a>
-
       </nav>
     </div>
     <div>
+      <!-- Filtro de fechas -->
+      <form action="/filtrar_eventos" method="GET" class="inline-flex items-center space-x-2">
+        <input type="date" name="start_date" class="px-2 py-1 text-sm text-gray-700" value="{{ request.args.get('start_date', '') }}">
+        <input type="date" name="end_date" class="px-2 py-1 text-sm text-gray-700" value="{{ request.args.get('end_date', '') }}">
+        <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded-md">Filtrar</button>
+      </form>      
       {% if session.get('user_name') %}
-      <span class="mr-4">Hola, {{ session['user_name'] }}</span>
-      <a href="/logout" class="text-sm text-red-300 hover:underline">Cerrar sesión</a>
+        <span class="mr-4">Hola, {{ session['user_name'] }}</span>
+        <a href="/logout" class="text-sm text-red-300 hover:underline">Cerrar sesión</a>
       {% else %}
-      <a href="/login" class="text-sm text-white hover:underline">Iniciar sesión</a>
+        <a href="/login" class="text-sm text-white hover:underline">Iniciar sesión</a>
       {% endif %}
     </div>
   </header>

@@ -51,3 +51,18 @@ class Gasto(db.Model):
     id_evento = db.Column(db.Integer, db.ForeignKey('eventos.id_evento'), nullable=False)
     descripcion = db.Column(db.String(255), nullable=False)
     cantidad = db.Column(db.Numeric, nullable=False)
+    
+class Asistencia(db.Model):
+    __tablename__ = 'asistencias'
+    id_asistencia = db.Column(db.Integer, primary_key=True)
+    id_evento = db.Column(db.Integer, db.ForeignKey('eventos.id_evento'), nullable=False)
+    id_usuario = db.Column(db.Integer, db.ForeignKey('organizadores.id_organizador'), nullable=False)
+    fecha_asistencia = db.Column(db.DateTime, default=db.func.now())
+
+    # Relación con la tabla Evento
+    evento = db.relationship('Evento', backref=db.backref('lista_asistencias', lazy='dynamic'))
+
+    # Relación con la tabla Organizador (Usuario)
+    usuario = db.relationship('Organizador', backref='asistencias')
+
+

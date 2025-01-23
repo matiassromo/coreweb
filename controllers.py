@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, session, flash, url_for, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, Organizador, Evento, Categoria, EventoCategoria
+from datetime import datetime
+from models import db, Organizador, Evento, Categoria, EventoCategoria, Asistencia
 import re
 
 # Crear un Blueprint para las rutas
@@ -78,10 +79,19 @@ def logout():
 def home():
     if 'user_id' not in session:
         flash("Debes iniciar sesión para acceder a esta página.", "error")
-        print("Intento de acceso sin sesión activa.")
         return redirect(url_for('controllers.login'))
 
-    eventos = Evento.query.order_by(Evento.fecha_creacion.desc()).all()
+    # Obtener las fechas desde los parámetros de la URL
+    start_date = request.args.get('start_date', None)
+    end_date = request.args.get('end_date', None)
+    
+    # Filtrar eventos si las fechas están presentes
+    if start_date and end_date:
+        eventos = Evento.query.filter(Evento.fecha.between(start_date, end_date)).all()
+    else:
+        eventos = Evento.query.all()
+
+    # Pasar los eventos al template
     return render_template("index.html", eventos=eventos, user_name=session.get('user_name'))
 
 @controllers_bp.route('/crear_evento', methods=['GET', 'POST'])
@@ -137,6 +147,7 @@ def crear_evento():
     return render_template('crear_evento.html', categorias=categorias)
 
 # --- API para obtener eventos ---
+# Ruta para obtener todos los eventos
 @controllers_bp.route('/api/eventos')
 def get_eventos():
     eventos = Evento.query.order_by(Evento.fecha_creacion.desc()).limit(20).all()
@@ -149,13 +160,15 @@ def get_eventos():
             "hora": evento.hora.strftime("%H:%M:%S") if evento.hora else None,
             "lugar": evento.lugar,
             "presupuesto": float(evento.presupuesto),
-            "categoria": Categoria.query.get(EventoCategoria.query.filter_by(id_evento=evento.id_evento).first().id_categoria).nombre
-            if EventoCategoria.query.filter_by(id_evento=evento.id_evento).first() else "Sin categoría"
-            
+            "categoria": Categoria.query.get(EventoCategoria.query.filter_by(id_evento=evento.id_evento).first().id_categoria).nombre if EventoCategoria.query.filter_by(id_evento=evento.id_evento).first() else "Sin categoría",
+            "asistentes_count": len(evento.asistencias)  # Contamos las asistencias de este evento
         }
         for evento in eventos
     ]
     return jsonify(eventos_json)
+
+
+
 
 @controllers_bp.route('/gastos', methods=['GET', 'POST'])
 def gastos():
@@ -369,7 +382,50 @@ def sugerencias_evento():
         categoria_seleccionada=categoria_seleccionada,
         presupuesto_filtro=presupuesto_filtro,
     )
+    
+    
+@controllers_bp.route('/asistir_evento/<int:id_evento>', methods=['POST'])
+def asistir_evento(id_evento):
+    if 'user_id' not in session:
+        flash("Debes iniciar sesión para asistir a un evento.", "error")
+        return redirect(url_for('controllers.login'))
+
+    evento = Evento.query.get_or_404(id_evento) #se busca el evento en la bdd
+    if evento:
+        # Crea un nuevo registro de asistencia en base al evento que desea asistir y el id usuario que asisite
+        asistencia = Asistencia(id_evento=id_evento, id_usuario=session['user_id'])
+        
+        db.session.add(asistencia)
+        
+        db.session.commit()
+        flash(f"Te has inscrito correctamente al evento {evento.nombre}.", "success")
+
+    return redirect(url_for('controllers.home'))
+
+
+@controllers_bp.route('/filtrar_eventos', methods=['GET'])
+def filtrar_eventos():
+    if 'user_id' not in session:
+        flash("Debes iniciar sesión para acceder a esta funcionalidad.", "error")
+        return redirect(url_for('controllers.login'))
+
+    # Obtener las fechas de los parámetros 'start_date' y 'end_date'
+    start_date = request.args.get('start_date', None)
+    end_date = request.args.get('end_date', None)
+
+    if start_date and end_date:
+        # Filtrar los eventos por fecha de asistencia 
+        eventos = Evento.query.join(Asistencia).filter(
+            Asistencia.fecha_asistencia.between(start_date, end_date)
+        ).all()
+    else:
+        # Si no hay filtro, obtener todos los eventos
+        eventos = Evento.query.all()
+
+    return render_template('index.html', eventos=eventos)
 
 
 if __name__ == "__main__":
     controllers_bp.run(debug=True)
+
+
