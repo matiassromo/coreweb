@@ -148,7 +148,10 @@ def get_eventos():
             "fecha": evento.fecha.strftime("%Y-%m-%d"),
             "hora": evento.hora.strftime("%H:%M:%S") if evento.hora else None,
             "lugar": evento.lugar,
-            "presupuesto": float(evento.presupuesto)
+            "presupuesto": float(evento.presupuesto),
+            "categoria": Categoria.query.get(EventoCategoria.query.filter_by(id_evento=evento.id_evento).first().id_categoria).nombre
+            if EventoCategoria.query.filter_by(id_evento=evento.id_evento).first() else "Sin categoría"
+            
         }
         for evento in eventos
     ]
