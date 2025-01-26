@@ -27,6 +27,24 @@ Este es un proyecto para gestionar eventos en línea. Permite a los organizadore
 ### 6. Sugerencias de Eventos
 - Los usuarios pueden obtener sugerencias basadas en las categorías, lugares y presupuestos de eventos anteriores.
 
+## Principios SOLID Aplicados
+
+1. **Single Responsibility Principle (SRP)**
+   - **`EventService`** maneja la lógica de negocio relacionada con los eventos.
+   - **`EventoRepository`** se encarga de las operaciones de acceso a datos, como la consulta de eventos en la base de datos.
+   - Cada clase tiene una responsabilidad única, lo que facilita su mantenimiento y extensión.
+
+2. **Dependency Inversion Principle (DIP)**
+   - **`EventService`** depende de **`EventoRepository`** para obtener datos de eventos, pero no está acoplada a una implementación específica. Esto permite intercambiar el repositorio sin afectar el resto del código.
+
+## Patrones de Diseño Aplicados
+
+1. **Repository Pattern**
+   - Se ha implementado el patrón **Repository** en **`EventoRepository`** para separar la lógica de acceso a datos de la lógica de negocio. Esto hace que la capa de persistencia esté bien definida y aislada del resto de la aplicación.
+   
+2. **Dependency Injection**
+   - La **inyección de dependencias** se aplica al pasar **`EventoRepository`** como una dependencia en **`EventService`**, lo que desacopla estas clases y facilita su prueba y mantenimiento.
+
 ## Tecnologías Utilizadas
 
 ### Backend:
