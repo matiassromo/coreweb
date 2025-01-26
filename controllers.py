@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, request, redirect, session, flash,
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from models import db, Organizador, Evento, Categoria, EventoCategoria, Asistencia
+from services.evento_service import EventService
+from services.evento_repository import EventoRepository
 import re
 
 # Crear un Blueprint para las rutas
@@ -390,17 +392,16 @@ def asistir_evento(id_evento):
         flash("Debes iniciar sesión para asistir a un evento.", "error")
         return redirect(url_for('controllers.login'))
 
-    evento = Evento.query.get_or_404(id_evento) #se busca el evento en la bdd
+    evento = Evento.query.get_or_404(id_evento)  # se busca el evento en la BDD
     if evento:
-        # Crea un nuevo registro de asistencia en base al evento que desea asistir y el id usuario que asisite
+        # Crea un nuevo registro de asistencia en base al evento que desea asistir y el id usuario que asiste
         asistencia = Asistencia(id_evento=id_evento, id_usuario=session['user_id'])
-        
         db.session.add(asistencia)
-        
         db.session.commit()
         flash(f"Te has inscrito correctamente al evento {evento.nombre}.", "success")
 
     return redirect(url_for('controllers.home'))
+
 
 
 @controllers_bp.route('/filtrar_eventos', methods=['GET'])
@@ -409,20 +410,29 @@ def filtrar_eventos():
         flash("Debes iniciar sesión para acceder a esta funcionalidad.", "error")
         return redirect(url_for('controllers.login'))
 
-    # Obtener las fechas de los parámetros 'start_date' y 'end_date'
     start_date = request.args.get('start_date', None)
     end_date = request.args.get('end_date', None)
 
-    if start_date and end_date:
-        # Filtrar los eventos por fecha de asistencia 
-        eventos = Evento.query.join(Asistencia).filter(
-            Asistencia.fecha_asistencia.between(start_date, end_date)
-        ).all()
-    else:
-        # Si no hay filtro, obtener todos los eventos
-        eventos = Evento.query.all()
+    # Validar y convertir las fechas
+    try:
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date() if start_date else None
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date() if end_date else None
+    except ValueError as e:
+        flash("El formato de las fechas no es válido.", "error")
+        return redirect(url_for('controllers.filtrar_eventos'))
 
+    # Crear una instancia del repositorio
+    evento_repository = EventoRepository()
+
+    # Crear la instancia del servicio
+    event_service = EventService(evento_repository)
+
+    # Filtrar eventos
+    eventos = event_service.filtrar_eventos(start_date_obj, end_date_obj)
+
+    # Pasar los eventos filtrados al template
     return render_template('index.html', eventos=eventos)
+
 
 
 if __name__ == "__main__":
