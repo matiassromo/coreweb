@@ -24,6 +24,7 @@ class Evento(db.Model):
     presupuesto = db.Column(db.Numeric, nullable=False)
     id_organizador = db.Column(db.Integer, db.ForeignKey('organizadores.id_organizador'), nullable=False)
     fecha_creacion = db.Column(db.DateTime, server_default=db.func.now())
+    
 
     # Relación muchos a muchos con Categorias
     categorias = db.relationship(
@@ -63,6 +64,6 @@ class Asistencia(db.Model):
     evento = db.relationship('Evento', backref=db.backref('lista_asistencias', lazy='dynamic'))
 
     # Relación con la tabla Organizador (Usuario)
-    usuario = db.relationship('Organizador', backref='asistencias')
+    #usuario = db.relationship('Organizador', backref='asistencias')
 
 

@@ -162,12 +162,13 @@ def get_eventos():
             "hora": evento.hora.strftime("%H:%M:%S") if evento.hora else None,
             "lugar": evento.lugar,
             "presupuesto": float(evento.presupuesto),
-            "categoria": Categoria.query.get(EventoCategoria.query.filter_by(id_evento=evento.id_evento).first().id_categoria).nombre if EventoCategoria.query.filter_by(id_evento=evento.id_evento).first() else "Sin categoría",
-            "asistentes_count": len(evento.asistencias)  # Contamos las asistencias de este evento
+            "categorias": [categoria.nombre for categoria in evento.categorias],  # Extraer solo los nombres
+            "asistentes_count": evento.lista_asistencias.count()
         }
         for evento in eventos
     ]
     return jsonify(eventos_json)
+
 
 
 

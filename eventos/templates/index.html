@@ -15,12 +15,16 @@
           </div>
           <!-- Parte trasera de la tarjeta -->
           <div class="card-back bg-gray-800 text-white flex flex-col items-center justify-center shadow-lg">
-            <p><strong>Categoría:</strong> {{ evento.categoria }}</p>
+            <p><strong>Categorías:</strong>
+              {% for categoria in evento.categorias %}
+                {{ categoria.nombre }}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            </p>
             <p><strong>Fecha:</strong> {{ evento.fecha }}</p>
             <p><strong>Hora:</strong> {{ evento.hora }}</p>
             <p><strong>Lugar:</strong> {{ evento.lugar }}</p>
             <p v-if="evento.presupuesto"><strong>Presupuesto:</strong> ${{ evento.presupuesto }}</p>
-            <p><strong>Asistentes:</strong> {{ evento.asistentes_count }}</p> <!-- Mostrar la cantidad de asistentes -->
+            <p><strong>Asistentes:</strong> {{ evento.lista_asistencias.count() }}</p> <!-- Mostrar la cantidad de asistentes -->
             <!-- Botón de asistir -->
             <form method="POST" action="{{ url_for('controllers.asistir_evento', id_evento=evento.id_evento) }}">
               <button type="submit" class="btn btn-primary">Asistir</button>
